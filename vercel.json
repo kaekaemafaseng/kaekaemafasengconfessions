@@ -1,3 +1,4 @@
 {
-  "installCommand": "npm install --legacy-peer-deps && npm install ajv@8"
+  "installCommand": "npm install --legacy-peer-deps && npm install ajv@8",
+  "buildCommand": "CI=false npm run build"
 }
