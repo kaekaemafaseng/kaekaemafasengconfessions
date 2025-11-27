@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged,
+} from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -16,7 +20,6 @@ import {
   Music,
   X,
   Sparkles,
-  Moon,
 } from "lucide-react";
 
 // --- 1. PASTE YOUR FIREBASE CONFIG HERE ---
@@ -65,7 +68,8 @@ const ScreenshotCard = ({ data }) => {
         <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-white/70 border border-white/10">
           AA Session #{data.number}
         </div>
-        <Moon size={16} className="text-white/20" />
+        {/* Logo in Creator View */}
+        <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full border border-white/20" />
       </div>
       {/* Content */}
       <div className="flex-grow flex items-center justify-center my-4 relative z-10">
@@ -173,7 +177,7 @@ const App = () => {
           </div>
           <button
             onClick={() => {
-              // CHANGE "2024" TO YOUR OWN SECRET PASSWORD
+              // REPLACE THIS WITH THE SECURE VERSION IF YOU SET IT UP
               const secret = prompt("Enter Admin Password:");
               if (secret === "2024") {
                 setView("submit");
@@ -226,19 +230,22 @@ const App = () => {
     );
   }
 
+  // OPTIMIZED MAIN VIEW WITH CSS GRADIENTS AND LOGO
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-fuchsia-500 selection:text-white relative overflow-x-hidden">
-      <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] bg-fuchsia-600/20 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-fuchsia-500 selection:text-white relative overflow-x-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-fuchsia-900/20 via-slate-950 to-slate-950">
+      
       <div className="relative z-10 flex flex-col items-center min-h-screen p-4 md:p-6">
-        <div className="w-full max-w-lg mt-8 md:mt-16 mb-20">
-          <div className="mb-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4">
-              <Moon size={12} className="text-fuchsia-400" />
-              <span className="text-xs font-bold tracking-widest uppercase text-slate-300">
-                Anonymous Submission
-              </span>
-            </div>
+        <div className="w-full max-w-lg mt-8 md:mt-16 mb-12">
+          <div className="mb-10 text-center flex flex-col items-center">
+            
+            {/* --- NEW LOGO PLACEMENT --- */}
+            <img 
+              src="/logo.jpg" 
+              alt="Afterhours Anonymous Logo" 
+              className="w-24 h-24 md:w-32 md:h-32 mb-6 rounded-full border-2 border-white/10 shadow-lg shadow-fuchsia-500/20"
+            />
+            {/* -------------------------- */}
+
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter">
               Afterhours Anonymous
             </h1>
@@ -307,7 +314,6 @@ const App = () => {
         <footer className="absolute bottom-6 w-full text-center">
           <button
             onClick={() => {
-              // CHANGE "2024" TO YOUR OWN SECRET PASSWORD
               const secret = prompt("Enter Admin Password:");
               if (secret === "2024") {
                 setView("admin");
