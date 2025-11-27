@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  signInAnonymously,
-  onAuthStateChanged,
-} from "firebase/auth";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -68,8 +64,12 @@ const ScreenshotCard = ({ data }) => {
         <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-white/70 border border-white/10">
           AA Session #{data.number}
         </div>
-        {/* Logo in Creator View */}
-        <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full border border-white/20" />
+        {/* Logo in Creator View (Using PNG now) */}
+        <img
+          src="/logo.png"
+          alt="Logo"
+          className="w-10 h-10 object-contain opacity-80"
+        />
       </div>
       {/* Content */}
       <div className="flex-grow flex items-center justify-center my-4 relative z-10">
@@ -233,18 +233,17 @@ const App = () => {
   // OPTIMIZED MAIN VIEW WITH CSS GRADIENTS AND LOGO
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-fuchsia-500 selection:text-white relative overflow-x-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-fuchsia-900/20 via-slate-950 to-slate-950">
-      
       <div className="relative z-10 flex flex-col items-center min-h-screen p-4 md:p-6">
         <div className="w-full max-w-lg mt-8 md:mt-16 mb-12">
           <div className="mb-10 text-center flex flex-col items-center">
-            
-            {/* --- NEW LOGO PLACEMENT --- */}
-            <img 
-              src="/logo.jpg" 
-              alt="Afterhours Anonymous Logo" 
-              className="w-24 h-24 md:w-32 md:h-32 mb-6 rounded-full border-2 border-white/10 shadow-lg shadow-fuchsia-500/20"
+            {/* --- LOGO UPDATED TO PNG --- */}
+            {/* Using object-contain to ensure it doesn't stretch */}
+            <img
+              src="/logo.png"
+              alt="Afterhours Anonymous Logo"
+              className="w-32 h-32 md:w-40 md:h-40 mb-6 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
             />
-            {/* -------------------------- */}
+            {/* --------------------------- */}
 
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter">
               Afterhours Anonymous
