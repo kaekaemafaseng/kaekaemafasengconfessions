@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged,
+} from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -37,6 +41,27 @@ const db = getFirestore(app);
 
 const COLLECTION_NAME = "groove_confessions";
 
+// --- HELPER: Split Text into Card-Sized Chunks ---
+const MAX_CHARS = 140; // Max characters per card to keep font large
+
+const splitTextIntoChunks = (text) => {
+  if (!text) return [];
+  const words = text.split(" ");
+  const chunks = [];
+  let currentChunk = "";
+
+  words.forEach((word) => {
+    if ((currentChunk + " " + word).trim().length <= MAX_CHARS) {
+      currentChunk = (currentChunk + " " + word).trim();
+    } else {
+      chunks.push(currentChunk);
+      currentChunk = word;
+    }
+  });
+  if (currentChunk) chunks.push(currentChunk);
+  return chunks;
+};
+
 // --- Aesthetic Card Component ---
 const ScreenshotCard = ({ data }) => {
   const gradients = [
@@ -60,25 +85,29 @@ const ScreenshotCard = ({ data }) => {
       </div>
 
       {/* Header */}
-      <div className="flex justify-between items-start mb-6 relative z-10">
+      <div className="flex justify-between items-start mb-4 relative z-10 shrink-0">
         <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-white/70 border border-white/10">
+          {/* Handles "Session #105" OR "Session #105 (Part 1/3)" */}
           AA Session #{data.number}
+          {data.totalParts > 1 && (
+            <span className="text-fuchsia-300 ml-1">
+              (Part {data.part}/{data.totalParts})
+            </span>
+          )}
         </div>
-        {/* Logo in Creator View (Using PNG now) */}
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="w-10 h-10 object-contain opacity-80"
-        />
+        {/* Logo in Creator View */}
+        <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain opacity-80" />
       </div>
-      {/* Content */}
-      <div className="flex-grow flex items-center justify-center my-4 relative z-10">
-        <p className="font-sans text-2xl md:text-3xl leading-tight text-white font-medium drop-shadow-md text-center">
+      
+      {/* Content - Fixed Large Font */}
+      <div className="flex-grow flex items-center justify-center my-2 relative z-10 overflow-hidden">
+        <p className="font-sans text-2xl md:text-3xl leading-snug text-white font-medium drop-shadow-md text-center break-words w-full">
           "{data.text}"
         </p>
       </div>
+      
       {/* Footer */}
-      <div className="mt-6 pt-6 border-t border-white/10 flex items-center gap-3 text-white/60 text-sm font-medium relative z-10">
+      <div className="mt-4 pt-4 border-t border-white/10 flex items-center gap-3 text-white/60 text-sm font-medium relative z-10 shrink-0">
         <div className="p-2 bg-white/5 rounded-full">
           <MapPin size={14} className="text-white" />
         </div>
@@ -162,7 +191,30 @@ const App = () => {
     }
   };
 
+  // --- PREPARE DATA FOR ADMIN VIEW (SPLIT LONG STORIES) ---
+  const getDisplayCards = () => {
+    // We flatten the list so that one confession can turn into multiple card objects
+    return confessions.flatMap((confession) => {
+      const chunks = splitTextIntoChunks(confession.text);
+      
+      // If it's short enough, just return original
+      if (chunks.length <= 1) return [confession];
+
+      // If long, return array of "Part" objects
+      return chunks.map((chunkText, index) => ({
+        ...confession,
+        text: chunkText,
+        part: index + 1,
+        totalParts: chunks.length,
+        // Create a fake ID for React list keys
+        uniqueId: `${confession.id}-part-${index}`
+      }));
+    });
+  };
+
   if (view === "admin") {
+    const displayCards = getDisplayCards();
+
     return (
       <div className="min-h-screen bg-slate-950 p-6 selection:bg-fuchsia-500 selection:text-white">
         <header className="flex justify-between items-center mb-8">
@@ -177,7 +229,6 @@ const App = () => {
           </div>
           <button
             onClick={() => {
-              // REPLACE THIS WITH THE SECURE VERSION IF YOU SET IT UP
               const secret = prompt("Enter Admin Password:");
               if (secret === "2024") {
                 setView("submit");
@@ -191,8 +242,11 @@ const App = () => {
           </button>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {confessions.map((c) => (
-            <ScreenshotCard key={c.id} data={c} />
+          {displayCards.map((c) => (
+            <ScreenshotCard 
+              key={c.uniqueId || c.id} 
+              data={c} 
+            />
           ))}
         </div>
         {confessions.length === 0 && (
@@ -230,21 +284,21 @@ const App = () => {
     );
   }
 
-  // OPTIMIZED MAIN VIEW WITH CSS GRADIENTS AND LOGO
+  // OPTIMIZED MAIN VIEW
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-fuchsia-500 selection:text-white relative overflow-x-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-fuchsia-900/20 via-slate-950 to-slate-950">
+      
       <div className="relative z-10 flex flex-col items-center min-h-screen p-4 md:p-6">
         <div className="w-full max-w-lg mt-8 md:mt-16 mb-12">
           <div className="mb-10 text-center flex flex-col items-center">
-            {/* --- LOGO UPDATED TO PNG --- */}
-            {/* Using object-contain to ensure it doesn't stretch */}
-            <img
-              src="/logo.png"
-              alt="Afterhours Anonymous Logo"
+            
+            {/* LOGO */}
+            <img 
+              src="/logo.png" 
+              alt="Afterhours Anonymous Logo" 
               className="w-32 h-32 md:w-40 md:h-40 mb-6 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
             />
-            {/* --------------------------- */}
-
+            
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter">
               Afterhours Anonymous
             </h1>
