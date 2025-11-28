@@ -42,7 +42,8 @@ const db = getFirestore(app);
 const COLLECTION_NAME = "groove_confessions";
 
 // --- HELPER: Split Text into Card-Sized Chunks ---
-const MAX_CHARS = 140; // Max characters per card to keep font large
+// Increased to 180 to allow "smart squeezing" of slightly longer stories
+const MAX_CHARS = 180; 
 
 const splitTextIntoChunks = (text) => {
   if (!text) return [];
@@ -51,11 +52,17 @@ const splitTextIntoChunks = (text) => {
   let currentChunk = "";
 
   words.forEach((word) => {
+    // Check if adding the next word exceeds the max length
     if ((currentChunk + " " + word).trim().length <= MAX_CHARS) {
       currentChunk = (currentChunk + " " + word).trim();
     } else {
-      chunks.push(currentChunk);
-      currentChunk = word;
+      // If current chunk is empty but word is huge (edge case), force it
+      if (!currentChunk) {
+         chunks.push(word);
+      } else {
+         chunks.push(currentChunk);
+         currentChunk = word;
+      }
     }
   });
   if (currentChunk) chunks.push(currentChunk);
@@ -72,6 +79,18 @@ const ScreenshotCard = ({ data }) => {
   ];
 
   const bgGradient = gradients[(data.number || 0) % gradients.length];
+
+  // --- SMART FONT SIZING ---
+  // Dynamically adjusts font based on how full the card is.
+  // This prevents short text from looking tiny, and long text from overflowing.
+  const getFontSizeClass = (textLength) => {
+    if (textLength < 60) return "text-3xl md:text-4xl leading-tight";  // Short & Punchy
+    if (textLength < 110) return "text-2xl md:text-3xl leading-snug";   // Standard
+    if (textLength < 150) return "text-xl md:text-2xl leading-normal";   // Getting full
+    return "text-lg md:text-xl leading-relaxed";                         // Squeezing it in (150-180 chars)
+  };
+
+  const fontSizeClass = getFontSizeClass(data.text ? data.text.length : 0);
 
   return (
     <div
@@ -99,9 +118,9 @@ const ScreenshotCard = ({ data }) => {
         <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain opacity-80" />
       </div>
       
-      {/* Content - Fixed Large Font */}
+      {/* Content - Smart Dynamic Font */}
       <div className="flex-grow flex items-center justify-center my-2 relative z-10 overflow-hidden">
-        <p className="font-sans text-2xl md:text-3xl leading-snug text-white font-medium drop-shadow-md text-center break-words w-full">
+        <p className={`font-sans ${fontSizeClass} text-white font-medium drop-shadow-md text-center break-words w-full`}>
           "{data.text}"
         </p>
       </div>
