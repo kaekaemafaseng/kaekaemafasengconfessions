@@ -387,7 +387,7 @@ const App = () => {
           <button
             onClick={() => {
               const secret = prompt("Enter Admin Password:");
-              if (secret === "2024") {
+              if (secret === "051024") {
                 setView("admin");
               } else {
                 alert("Wrong password. Access denied.");
