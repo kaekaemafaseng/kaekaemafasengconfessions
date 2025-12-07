@@ -346,7 +346,7 @@ const App = () => {
                   name="club"
                   value={formData.club}
                   onChange={handleChange}
-                  placeholder="Club Name"
+                  placeholder="Location / Setting"
                   className="w-full bg-transparent text-white placeholder:text-slate-600 border-none focus:ring-0 p-0"
                 />
               </div>
